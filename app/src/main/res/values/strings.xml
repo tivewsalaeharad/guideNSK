@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Путеводитель НСК</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="select">Выбор редакции</string>
+    <string name="map">Всё на карте</string>
+    <string name="favourites">Избранное</string>
+    <string name="title_activity_maps">Map</string>
+</resources>
