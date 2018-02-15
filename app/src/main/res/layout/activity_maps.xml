@@ -7,4 +7,4 @@
     android:enabled="true"
     android:clickable="true"
     android:focusable="true"
-    tools:context="com.hand.guidensk.MapsActivity"/>
+    tools:context="com.hand.guidensk.screen.MapsActivity"/>
