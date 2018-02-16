@@ -25,6 +25,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.hand.guidensk.R;
+import com.hand.guidensk.db.DB;
 import com.hand.guidensk.utils.PermissionUtils;
 import com.hand.guidensk.dialog.PermissionDialog;
 
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback,
         PermissionDialog.GetPermissionListener{
 
+    //Поля, связанные с определением коорднат
     public static final String TAG_PERMISSION_DIALOG = "PermissionDialog";
     public static final int LOCATION_UPDATE_FREQUENCY = 5000;
     private static Boolean gpsEnabled;
@@ -82,6 +84,9 @@ public class MainActivity extends AppCompatActivity implements
         MyTimerTask timerTask = new MyTimerTask();
         timerTask.activity = this;
         timer.schedule(timerTask, LOCATION_UPDATE_FREQUENCY, LOCATION_UPDATE_FREQUENCY);
+
+        //Настройка баз данных
+        DB.init(this);
     }
 
     @Override
