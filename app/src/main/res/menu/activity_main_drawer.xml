@@ -1,17 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
     <item
         android:id="@+id/nav_select"
         android:icon="@drawable/icon_crown"
         android:title="@string/select" />
-    <item
-        android:id="@+id/nav_map"
-        android:icon="@drawable/icon_location"
-        android:title="@string/map"
-        android:enabled="false"/>
+    <group android:id="@+id/group_map">
+        <item
+            android:id="@+id/nav_map"
+            android:enabled="false"
+            android:icon="@drawable/icon_location"
+            android:title="@string/map" />
+        <item
+            android:id="@+id/nav_dinner"
+            android:enabled="false"
+            android:icon="@drawable/marker_dinner"
+            android:title="@string/dinner" />
+        <item
+            android:id="@+id/nav_hotel"
+            android:enabled="false"
+            android:icon="@drawable/marker_hotel"
+            android:title="@string/hotel" />
+        <item
+            android:id="@+id/nav_cinema"
+            android:enabled="false"
+            android:icon="@drawable/marker_cinema"
+            android:title="@string/cinema" />
+        <item
+            android:id="@+id/nav_shopping"
+            android:enabled="false"
+            android:icon="@drawable/marker_shopping"
+            android:title="@string/shopping" />
+        <item
+            android:id="@+id/nav_theatre"
+            android:enabled="false"
+            android:icon="@drawable/marker_theatre"
+            android:title="@string/theatre" />
+        <item
+            android:id="@+id/nav_museum"
+            android:enabled="false"
+            android:icon="@drawable/marker_museum"
+            android:title="@string/museum" />
+        <item
+            android:id="@+id/nav_interest"
+            android:enabled="false"
+            android:icon="@drawable/marker_science"
+            android:title="@string/interest" />
+        <item
+            android:id="@+id/nav_entertainment"
+            android:enabled="false"
+            android:icon="@drawable/marker_music"
+            android:title="@string/entertainment" />
+    </group>
     <item
         android:id="@+id/nav_favourites"
         android:icon="@drawable/icon_favourite"

@@ -38,8 +38,18 @@ public class MainActivity extends AppCompatActivity implements
         PermissionDialog.GetPermissionListener{
 
     //Поля, связанные с определением коорднат
-    public static final String TAG_PERMISSION_DIALOG = "PermissionDialog";
-    public static final int LOCATION_UPDATE_FREQUENCY = 5000;
+    private static final String TAG_PERMISSION_DIALOG = "PermissionDialog";
+    private static final String KEY_FILTER = "Filter";
+    private static final int LOCATION_UPDATE_FREQUENCY = 5000;
+    private static final int CODE_FILTER_DINNER = 0;
+    private static final int CODE_FILTER_HOTEL = 1;
+    private static final int CODE_FILTER_CINEMA = 2;
+    private static final int CODE_FILTER_SHOPPING = 3;
+    private static final int CODE_FILTER_THEATRE = 4;
+    private static final int CODE_FILTER_MUSEUM = 5;
+    private static final int CODE_FILTER_INTEREST = 6;
+    private static final int CODE_FILTER_ENTERTAINMENT = 7;
+    private static final int CODE_FILTER_ALL = -1;
     private static Boolean gpsEnabled;
     public static double latitude;
     public static double longitude;
@@ -67,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements
         toggle.syncState();
 
         NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this);
         navigationMenu = navigationView.getMenu();
 
@@ -117,13 +128,54 @@ public class MainActivity extends AppCompatActivity implements
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
+        Intent intent;
         switch (item.getItemId()) {
             case R.id.nav_select:
                 //
                 break;
             case R.id.nav_map:
-                Intent intent = new Intent(this, MapsActivity.class);
+                intent = new Intent(this, MapsActivity.class);
+                intent.putExtra(KEY_FILTER, CODE_FILTER_ALL);
+                startActivity(intent);
+                break;
+            case R.id.nav_dinner:
+                intent = new Intent(this, MapsActivity.class);
+                intent.putExtra(KEY_FILTER, CODE_FILTER_DINNER);
+                startActivity(intent);
+                break;
+            case R.id.nav_hotel:
+                intent = new Intent(this, MapsActivity.class);
+                intent.putExtra(KEY_FILTER, CODE_FILTER_HOTEL);
+                startActivity(intent);
+                break;
+            case R.id.nav_cinema:
+                intent = new Intent(this, MapsActivity.class);
+                intent.putExtra(KEY_FILTER, CODE_FILTER_CINEMA);
+                startActivity(intent);
+                break;
+            case R.id.nav_shopping:
+                intent = new Intent(this, MapsActivity.class);
+                intent.putExtra(KEY_FILTER, CODE_FILTER_SHOPPING);
+                startActivity(intent);
+                break;
+            case R.id.nav_theatre:
+                intent = new Intent(this, MapsActivity.class);
+                intent.putExtra(KEY_FILTER, CODE_FILTER_THEATRE);
+                startActivity(intent);
+                break;
+            case R.id.nav_museum:
+                intent = new Intent(this, MapsActivity.class);
+                intent.putExtra(KEY_FILTER, CODE_FILTER_MUSEUM);
+                startActivity(intent);
+                break;
+            case R.id.nav_interest:
+                intent = new Intent(this, MapsActivity.class);
+                intent.putExtra(KEY_FILTER, CODE_FILTER_INTEREST);
+                startActivity(intent);
+                break;
+            case R.id.nav_entertainment:
+                intent = new Intent(this, MapsActivity.class);
+                intent.putExtra(KEY_FILTER, CODE_FILTER_ENTERTAINMENT);
                 startActivity(intent);
                 break;
             case R.id.nav_favourites:
@@ -179,10 +231,12 @@ public class MainActivity extends AppCompatActivity implements
                     latitude = location.getLatitude();
                     longitude = location.getLongitude();
                     progressBar.setVisibility(View.GONE);
-                    navigationMenu.getItem(1).setEnabled(true);
+                    //navigationMenu.getItem(1).setEnabled(true);
+                    navigationMenu.setGroupEnabled(R.id.group_map, true);
                 } else {
                     progressBar.setVisibility(View.VISIBLE);
-                    navigationMenu.getItem(1).setEnabled(false);
+                    //navigationMenu.getItem(1).setEnabled(false);
+                    navigationMenu.setGroupEnabled(R.id.group_map, false);
                 }
             }
         });
@@ -218,7 +272,8 @@ public class MainActivity extends AppCompatActivity implements
 
     private void gpsTurnedOffMessage() {
         Snackbar.make(mainLayout, R.string.gps_turned_off, Snackbar.LENGTH_SHORT).setAction(R.string.ok, null).show();
-        navigationMenu.getItem(1).setEnabled(false);
+        //navigationMenu.getItem(1).setEnabled(false);
+        navigationMenu.setGroupEnabled(R.id.group_map, false);
         progressBar.setVisibility(View.GONE);
     }
 
@@ -232,7 +287,8 @@ public class MainActivity extends AppCompatActivity implements
                     if(gpsEnabled) activity.setLocation();
                     else {
                         progressBar.setVisibility(View.GONE);
-                        navigationMenu.getItem(1).setEnabled(false);
+                        //navigationMenu.getItem(1).setEnabled(false);
+                        navigationMenu.setGroupEnabled(R.id.group_map, false);
                     }
                 }
             });
