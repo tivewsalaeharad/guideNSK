@@ -5,16 +5,29 @@ import android.database.Cursor;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
 import com.hand.guidensk.R;
 import com.hand.guidensk.db.DB;
+import com.hand.guidensk.models.Route;
+import com.hand.guidensk.models.RouteResponse;
+import com.hand.guidensk.network.ApiFactory;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
@@ -48,9 +61,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String[] categories = {"Где поесть", "Где остановиться", "Кино", "Шопинг", "Театры",
             "Музеи", "Интересные места", "Развлечения"};
 
-    float zoomLevel = 11.0f;
-    double maxLat = 0, minLat = 200, maxLng = 0, minLng = 100;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,15 +74,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        LatLng center;
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
         Cursor cursor;
         if (filter == -1) cursor = DB.db.rawQuery("SELECT * FROM sites", null);
         else cursor = DB.db.rawQuery("SELECT * FROM sites WHERE category=?", new String[] {filter + ""});
         cursor.moveToFirst();
-        while (!cursor.isAfterLast()) putMarkerFromCursor(cursor);
+        while (!cursor.isAfterLast()) {
+            LatLng point = putMarkerFromCursor(cursor);
+            if (point != null) builder.include(point);
+        }
         cursor.close();
-        center = new LatLng((minLat + maxLat)/2, (minLng + maxLng)/2);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, zoomLevel));
+        setCameraAndZoomToBuilder(builder);
         mMap.setOnMarkerClickListener(this);
     }
 
@@ -102,21 +114,61 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return false;
     }
 
-    private void putMarkerFromCursor(Cursor cursor) {
-        try {
-            int tag = cursor.getInt(0);
-            int category = cursor.getInt(13);
-            float lat = cursor.getFloat(11);
-            float lng = cursor.getFloat(12);
+    private LatLng putMarkerFromCursor(Cursor cursor) {
+       try {
+            LatLng point = new LatLng(cursor.getFloat(11), cursor.getFloat(12));
             Marker marker = mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(lat, lng))
-                    .icon(BitmapDescriptorFactory.fromResource(markers[category])));
-            marker.setTag(tag);
-            if (lat < minLat) minLat = lat; if (lat > maxLat) maxLat = lat;
-            if (lng < minLng) minLng = lng; if (lng > maxLng) maxLng = lng;
+                    .position(point)
+                    .icon(BitmapDescriptorFactory.fromResource(markers[cursor.getInt(13)])));
+            marker.setTag(cursor.getInt(0));
             cursor.moveToNext();
-        } catch (Exception ignore) {
+            return point;
+       } catch (Exception ignore) {
             cursor.moveToNext();
+            return null;
         }
+    }
+
+    private void drawRoute() {
+        Call<RouteResponse> call = ApiFactory.getService().getRoute(
+                "55.0302577,82.9233965",
+                "55.075086,82.908811",
+                true,
+                "ru");
+        call.enqueue(new Callback<RouteResponse>() {
+            @Override
+            public void onResponse(Call<RouteResponse> call, Response<RouteResponse> response) {
+                if (response.isSuccessful()) {
+                    List<Route> routes = response.body().getRoutes();
+                    if ((routes != null) && (routes.size()>0))
+                        drawRouteFromString(routes.get(0).getOverviewPolyline().getPoints());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RouteResponse> call, Throwable t) {}
+        });
+
+    }
+
+    private void drawRouteFromString(String points) {
+        List<LatLng> mPoints = PolyUtil.decode(points);
+        PolylineOptions line = new PolylineOptions();
+        line.width(4f).color(R.color.navy);
+        LatLngBounds.Builder latLngBuilder = new LatLngBounds.Builder();
+        for (int i = 0; i < mPoints.size(); i++) {
+            line.add(mPoints.get(i));
+            latLngBuilder.include(mPoints.get(i));
+        }
+        mMap.addPolyline(line);
+        setCameraAndZoomToBuilder(latLngBuilder);
+    }
+
+    private void setCameraAndZoomToBuilder(LatLngBounds.Builder builder) {
+        int size = getResources().getDisplayMetrics().widthPixels;
+        LatLngBounds latLngBounds = builder.build();
+        CameraUpdate track = CameraUpdateFactory.newLatLngBounds(latLngBounds, size, size, 25);
+        mMap.moveCamera(track);
+
     }
 }

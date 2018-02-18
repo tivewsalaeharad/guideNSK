@@ -37,13 +37,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:drawableStart="@drawable/icon_phone" />
+            android:drawableStart="@drawable/icon_phone"
+            android:onClick="onClick"/>
 
         <TextView
             android:id="@+id/email"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/navy"
+            android:drawableStart="@drawable/icon_web"
+            android:onClick="onClick"/>
 
         <TextView
             android:id="@+id/address"
@@ -52,13 +56,7 @@
             android:gravity="center_horizontal" />
 
         <TextView
-            android:id="@+id/working_hours"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal" />
-
-        <TextView
-            android:id="@+id/break_hours"
+            android:id="@+id/hours"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal" />
@@ -68,6 +66,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"/>
+
+        <TextView
+            android:id="@+id/favourites"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_vertical"
+            android:onClick="onClick"/>
 
     </LinearLayout>
 </ScrollView>

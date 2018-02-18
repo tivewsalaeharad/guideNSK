@@ -1,14 +1,22 @@
 package com.hand.guidensk.screen;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hand.guidensk.R;
 
-public class PlaceActivity extends AppCompatActivity {
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
+public class PlaceActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String KEY_TAG = "Tag";
     private static final String KEY_TITLE = "Title";
@@ -21,8 +29,7 @@ public class PlaceActivity extends AppCompatActivity {
     private static final String KEY_CLOSED = "Closed";
     private static final String KEY_BREAK_START = "Break start";
     private static final String KEY_BREAK_END = "Break end";
-    private static final String KEY_LATITUDE = "Latitude";
-    private static final String KEY_LONGITUDE = "Longitude";
+    private static final String KEY_FAVOURITES = "Favourites";
 
     private int[] images = {
             R.drawable.image_dinner_cardamon,
@@ -67,8 +74,11 @@ public class PlaceActivity extends AppCompatActivity {
             R.drawable.image_entertainment_centralpark
     };
 
-    private static final String workingHoursTemplate = "Ежедневно с %s по %s";
-    private static final String breakHoursTemplate = "Перерыв с %s по %s";
+    private static final String WHOLE_DAY = "Круглосуточно\n";
+    private static final String WORKING_HOURS_TEMPLATE = "Ежедневно с %s по %s\n";
+    private static final String BREAK_HOURS_TEMPLATE = "Перерыв с %s по %s\n";
+    private static final String NOW_OPENED = "Сейчас открыто";
+    private static final String NOW_CLOSED = "Сейчас закрыто";
 
     TextView title;
     TextView preDescription;
@@ -76,49 +86,125 @@ public class PlaceActivity extends AppCompatActivity {
     TextView phone;
     TextView email;
     TextView address;
-    TextView workingHours;
-    TextView breakHours;
+    TextView hours;
     TextView description;
+    TextView favourites;
 
+    private static SimpleDateFormat hhmm;
+    private Date today;
+    private int tag;
+    private SharedPreferences preferences;
+    private long favouriteSet;
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.email:
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(email.getText().toString())));
+                break;
+            case R.id.phone:
+                startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone.getText().toString())));
+                break;
+            case R.id.favourites:
+                xorFavourites();
+                setFavourites();
+                break;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place);
+        hhmm = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        hhmm.setTimeZone(TimeZone.getTimeZone("GMT+07"));
+        today = new Date();
+        preferences = getPreferences(MODE_PRIVATE);
+        favouriteSet = preferences.getLong(KEY_FAVOURITES, 0);
         title = findViewById(R.id.title);
         preDescription = findViewById(R.id.pre_description);
         image = findViewById(R.id.image);
         phone = findViewById(R.id.phone);
         email = findViewById(R.id.email);
         address = findViewById(R.id.address);
-        workingHours = findViewById(R.id.working_hours);
-        breakHours = findViewById(R.id.break_hours);
+        hours = findViewById(R.id.hours);
         description = findViewById(R.id.description);
+        favourites = findViewById(R.id.favourites);
         Intent intent = getIntent();
-        int tag = intent.getIntExtra(KEY_TAG, -1);
-        if(tag != -1) image.setImageResource(images[tag - 1]);
+        tag = intent.getIntExtra(KEY_TAG, -1);
+        if (tag != -1) image.setImageResource(images[tag - 1]);
         putText(title, intent, KEY_TITLE);
         putText(preDescription, intent, KEY_PRE_DESCRIPTION);
         putText(phone, intent, KEY_PHONE);
         putText(email, intent, KEY_WEBSITE);
         putText(address, intent, KEY_ADDRESS);
-        putDualText(workingHours, intent, workingHoursTemplate, KEY_OPENED, KEY_CLOSED);
-        putDualText(breakHours, intent, breakHoursTemplate, KEY_BREAK_START, KEY_BREAK_END);
+        putHours(intent);
         putText(description, intent, KEY_DESCRIPTION);
+        setFavourites();
+    }
 
-        double latitude = intent.getDoubleExtra(KEY_LATITUDE, 0);
-        double longitude = intent.getDoubleExtra(KEY_LONGITUDE, 0);
+    @Override
+    protected void onStop() {
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.putLong(KEY_FAVOURITES, favouriteSet);
+        ed.apply();
+        super.onStop();
     }
 
     private void putText(TextView textView, Intent intent, String key) {
         String text = intent.getStringExtra(key);
         if ((text != null) && !text.equals("")) textView.setText(text);
+        else textView.setVisibility(View.GONE);
     }
 
-    private void putDualText(TextView textView, Intent intent, String template, String key1, String key2) {
-        String a = intent.getStringExtra(key1);
-        String b = intent.getStringExtra(key2);
-        if ((a != null) && (b != null) && !a.equals("")&& !b.equals(""))
-            textView.setText(String.format(template, a, b));
+    private void putHours(Intent intent) {
+        String s = "";
+        String keyOpened = intent.getStringExtra(KEY_OPENED);
+        String keyClosed = intent.getStringExtra(KEY_CLOSED);
+        boolean wholeDay = keyOpened.equals("0:00") && keyClosed.equals("24:00");
+        String keyBreakStart = intent.getStringExtra(KEY_BREAK_START);
+        String keyBreakEnd = intent.getStringExtra(KEY_BREAK_END);
+        boolean opened = wholeDay || inTime(keyOpened, keyClosed) && !inTime(keyBreakStart, keyBreakEnd);
+        if ((keyOpened != null) && (keyClosed != null) && !keyOpened.equals("") && !keyClosed.equals(""))
+            s = s.concat(wholeDay ? WHOLE_DAY : String.format(WORKING_HOURS_TEMPLATE, keyOpened, keyClosed));
+        if ((keyBreakStart != null) && (keyBreakEnd != null) && !keyBreakStart.equals("") && !keyBreakEnd.equals(""))
+            s = s.concat(String.format(BREAK_HOURS_TEMPLATE, keyBreakStart, keyBreakEnd));
+        if (!s.equals("")) {
+            s = s.concat(opened ? NOW_OPENED : NOW_CLOSED);
+            hours.setTextColor(opened ? 0xFF008000 : 0xFF800000);
+            hours.setText(s);
+        } else hours.setVisibility(View.GONE);
     }
+
+    private boolean inTime(String strStart, String strEnd) {
+        try {
+            Date start = mouldTime(hhmm.parse(strStart));
+            Date end = mouldTime(hhmm.parse(strEnd));
+            return start.before(end) ? today.after(start) && today.before(end) : today.after(start) || today.before(end);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private Date mouldTime(Date date) {
+        Date newDate = new Date();
+        newDate.setHours(date.getHours());
+        newDate.setMinutes(date.getMinutes());
+        return newDate;
+    }
+
+    private void xorFavourites() {
+        favouriteSet = favouriteSet ^ (0x01 << tag - 1);
+    }
+
+    private void setFavourites() {
+        if ((favouriteSet & (0x01 << tag - 1)) != 0) {
+            favourites.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_favorites_added, 0, 0, 0);
+            favourites.setText("Удалить из избранного");
+        } else {
+            favourites.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_favorites_toadd, 0, 0, 0);
+            favourites.setText("Добавить в избранное");
+        }
+    }
+
 }
