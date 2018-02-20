@@ -59,7 +59,8 @@
             android:id="@+id/hours"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal" />
+            android:gravity="center_horizontal"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/description"
@@ -73,6 +74,17 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center_vertical"
+            android:onClick="onClick"/>
+
+        <TextView
+            android:id="@+id/route"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:text="@string/route"
+            android:textColor="@color/colorAccent"
             android:onClick="onClick"/>
 
     </LinearLayout>

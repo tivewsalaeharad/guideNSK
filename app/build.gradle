@@ -16,7 +16,7 @@ android {
         Обязательно разобраться
         Error:Execution failed for task ':app:transformClassesWithAndroidGradleClassShrinkerForDebug'.
         ProGuard configuration parser error:
-        C:\Users\Public\.gradle\caches\transforms-1\files-1.1\play-services-base-11.8.0.aar\362378501d4b458f8030309796dfa17f\proguard.txt
+        Images:\Users\Public\.gradle\caches\transforms-1\files-1.1\play-services-base-11.8.0.aar\362378501d4b458f8030309796dfa17f\proguard.txt
         line 3:88 no viable alternative at input '<fields>'
         debug {
             minifyEnabled true
@@ -44,6 +44,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.0'
     implementation 'com.squareup.retrofit2:retrofit:2.1.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.maps.android:android-maps-utils:0.3+'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'

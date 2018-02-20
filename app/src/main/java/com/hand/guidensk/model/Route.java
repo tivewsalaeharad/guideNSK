@@ -1,5 +1,5 @@
 
-package com.hand.guidensk.models;
+package com.hand.guidensk.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

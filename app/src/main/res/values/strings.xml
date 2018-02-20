@@ -17,8 +17,6 @@
     <string name="location_permission_denied">Геолокация запрещена. Отказано в доступе.</string>
     <string name="wait_message">Подождите, определяется местонахождение</string>
     <string name="gps_turned_off">GPS выключено</string>
-    <string name="cd_image">IMAGE</string>
-    <string name="cd_phone">PHONE</string>
     <string name="dinner">Где поесть</string>
     <string name="hotel">Где остановиться</string>
     <string name="cinema">Кинотеатры</string>
@@ -27,5 +25,11 @@
     <string name="museum">Музеи</string>
     <string name="interest">Интересные места</string>
     <string name="entertainment">Развлечения</string>
+
+    <string name="cd_image">IMAGE</string>
+    <string name="cd_phone">PHONE</string>
+    <string name="cd_remove">REMOVE</string>
+    <string name="title_activity_route">Проложить маршрут</string>
+    <string name="route">Проложить маршрут</string>
 
 </resources>

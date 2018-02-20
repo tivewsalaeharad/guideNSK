@@ -1,7 +1,6 @@
 package com.hand.guidensk.screen;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +9,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hand.guidensk.R;
+import com.hand.guidensk.constant.Images;
+import com.hand.guidensk.constant.Key;
+import com.hand.guidensk.constant.S;
+import com.hand.guidensk.utils.FavouritesUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,68 +20,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class PlaceActivity extends AppCompatActivity implements View.OnClickListener {
-
-    private static final String KEY_TAG = "Tag";
-    private static final String KEY_TITLE = "Title";
-    private static final String KEY_PRE_DESCRIPTION = "PreDescription";
-    private static final String KEY_DESCRIPTION = "Description";
-    private static final String KEY_ADDRESS = "Address";
-    private static final String KEY_PHONE = "Phone";
-    private static final String KEY_WEBSITE = "Website";
-    private static final String KEY_OPENED = "Opened";
-    private static final String KEY_CLOSED = "Closed";
-    private static final String KEY_BREAK_START = "Break start";
-    private static final String KEY_BREAK_END = "Break end";
-    private static final String KEY_FAVOURITES = "Favourites";
-
-    private int[] images = {
-            R.drawable.image_dinner_cardamon,
-            R.drawable.image_dinner_travellers,
-            R.drawable.image_dinner_westeast,
-            R.drawable.image_dinner_coffeecup,
-            R.drawable.image_dinner_om,
-            R.drawable.image_dinner_shafran,
-            R.drawable.image_dinner_lpshbr,
-            R.drawable.image_hotel_guestcourt,
-            R.drawable.image_hotel_hfotel,
-            R.drawable.image_hotel_domina,
-            R.drawable.image_hotel_centeravanta,
-            R.drawable.image_hotel_marins,
-            R.drawable.image_hotel_globus,
-            R.drawable.image_hotel_n,
-            R.drawable.image_hotel_radisson,
-            R.drawable.image_hotel_riverpark,
-            R.drawable.image_cinema_victory,
-            R.drawable.image_cinema_7thsky,
-            R.drawable.image_cinema_luxor,
-            R.drawable.image_shop_aura,
-            R.drawable.image_shop_versaille,
-            R.drawable.image_shop_mega,
-            R.drawable.image_shop_galery,
-            R.drawable.image_shop_royalpark,
-            R.drawable.image_theatre_operaballey,
-            R.drawable.image_theatre_globus,
-            R.drawable.image_theatre_katz,
-            R.drawable.image_museum_region,
-            R.drawable.image_museum_rerikh,
-            R.drawable.image_museum_art,
-            R.drawable.image_interest_transfiguration,
-            R.drawable.image_interest_ascencion,
-            R.drawable.image_interest_alexandrnevskiy,
-            R.drawable.image_interest_library,
-            R.drawable.image_interest_glory,
-            R.drawable.image_interest_hundredflats,
-            R.drawable.image_entertainment_zoo,
-            R.drawable.image_entertainment_spartak,
-            R.drawable.image_entertainment_circus,
-            R.drawable.image_entertainment_centralpark
-    };
-
-    private static final String WHOLE_DAY = "Круглосуточно\n";
-    private static final String WORKING_HOURS_TEMPLATE = "Ежедневно с %s по %s\n";
-    private static final String BREAK_HOURS_TEMPLATE = "Перерыв с %s по %s\n";
-    private static final String NOW_OPENED = "Сейчас открыто";
-    private static final String NOW_CLOSED = "Сейчас закрыто";
 
     TextView title;
     TextView preDescription;
@@ -89,12 +30,12 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
     TextView hours;
     TextView description;
     TextView favourites;
+    double latitude;
+    double longitude;
 
     private static SimpleDateFormat hhmm;
     private Date today;
     private int tag;
-    private SharedPreferences preferences;
-    private long favouriteSet;
 
     @Override
     public void onClick(View v) {
@@ -106,8 +47,17 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
                 startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone.getText().toString())));
                 break;
             case R.id.favourites:
-                xorFavourites();
+                FavouritesUtils.xor(tag);
                 setFavourites();
+                break;
+            case R.id.route:
+                Intent intent = new Intent(this, RouteActivity.class);
+                //Освободить после отладки
+                //intent.putExtra(Key.USER_LATITUDE, MainActivity.latitude);
+                //intent.putExtra(Key.USER_LONGITUDE, MainActivity.longitude);
+                intent.putExtra(Key.PLACE_LATITUDE, latitude);
+                intent.putExtra(Key.PLACE_LONGITUDE, longitude);
+                startActivity(intent);
                 break;
         }
     }
@@ -119,8 +69,6 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
         hhmm = new SimpleDateFormat("HH:mm", Locale.getDefault());
         hhmm.setTimeZone(TimeZone.getTimeZone("GMT+07"));
         today = new Date();
-        preferences = getPreferences(MODE_PRIVATE);
-        favouriteSet = preferences.getLong(KEY_FAVOURITES, 0);
         title = findViewById(R.id.title);
         preDescription = findViewById(R.id.pre_description);
         image = findViewById(R.id.image);
@@ -131,24 +79,19 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
         description = findViewById(R.id.description);
         favourites = findViewById(R.id.favourites);
         Intent intent = getIntent();
-        tag = intent.getIntExtra(KEY_TAG, -1);
-        if (tag != -1) image.setImageResource(images[tag - 1]);
-        putText(title, intent, KEY_TITLE);
-        putText(preDescription, intent, KEY_PRE_DESCRIPTION);
-        putText(phone, intent, KEY_PHONE);
-        putText(email, intent, KEY_WEBSITE);
-        putText(address, intent, KEY_ADDRESS);
+        tag = intent.getIntExtra(Key.TAG, -1);
+        if (tag != -1) image.setImageResource(Images.ARRAY[tag - 1]);
+        putText(title, intent, Key.TITLE);
+        putText(preDescription, intent, Key.PRE_DESCRIPTION);
+        putText(phone, intent, Key.PHONE);
+        putText(email, intent, Key.WEBSITE);
+        putText(address, intent, Key.ADDRESS);
         putHours(intent);
-        putText(description, intent, KEY_DESCRIPTION);
+        putText(description, intent, Key.DESCRIPTION);
         setFavourites();
-    }
+        latitude = intent.getDoubleExtra(Key.LATITUDE, 55.0302577);
+        longitude = intent.getDoubleExtra(Key.LONGITUDE, 82.9233965);
 
-    @Override
-    protected void onStop() {
-        SharedPreferences.Editor ed = preferences.edit();
-        ed.putLong(KEY_FAVOURITES, favouriteSet);
-        ed.apply();
-        super.onStop();
     }
 
     private void putText(TextView textView, Intent intent, String key) {
@@ -159,21 +102,20 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
 
     private void putHours(Intent intent) {
         String s = "";
-        String keyOpened = intent.getStringExtra(KEY_OPENED);
-        String keyClosed = intent.getStringExtra(KEY_CLOSED);
+        String keyOpened = intent.getStringExtra(Key.OPENED);
+        String keyClosed = intent.getStringExtra(Key.CLOSED);
+        if (notExist(keyOpened, keyClosed)) return;
         boolean wholeDay = keyOpened.equals("0:00") && keyClosed.equals("24:00");
-        String keyBreakStart = intent.getStringExtra(KEY_BREAK_START);
-        String keyBreakEnd = intent.getStringExtra(KEY_BREAK_END);
+        String keyBreakStart = intent.getStringExtra(Key.BREAK_START);
+        String keyBreakEnd = intent.getStringExtra(Key.BREAK_END);
         boolean opened = wholeDay || inTime(keyOpened, keyClosed) && !inTime(keyBreakStart, keyBreakEnd);
-        if ((keyOpened != null) && (keyClosed != null) && !keyOpened.equals("") && !keyClosed.equals(""))
-            s = s.concat(wholeDay ? WHOLE_DAY : String.format(WORKING_HOURS_TEMPLATE, keyOpened, keyClosed));
-        if ((keyBreakStart != null) && (keyBreakEnd != null) && !keyBreakStart.equals("") && !keyBreakEnd.equals(""))
-            s = s.concat(String.format(BREAK_HOURS_TEMPLATE, keyBreakStart, keyBreakEnd));
-        if (!s.equals("")) {
-            s = s.concat(opened ? NOW_OPENED : NOW_CLOSED);
-            hours.setTextColor(opened ? 0xFF008000 : 0xFF800000);
-            hours.setText(s);
-        } else hours.setVisibility(View.GONE);
+        s = s.concat(wholeDay ? S.WHOLE_DAY : String.format(S.WORKING_HOURS_TEMPLATE, keyOpened, keyClosed));
+        if (!notExist(keyBreakStart, keyBreakEnd))
+            s = s.concat(String.format(S.BREAK_HOURS_TEMPLATE, keyBreakStart, keyBreakEnd));
+        s = s.concat(opened ? S.NOW_OPENED : S.NOW_CLOSED);
+        hours.setTextColor(opened ? 0xFF008000 : 0xFF800000);
+        hours.setText(s);
+        hours.setVisibility(View.VISIBLE);
     }
 
     private boolean inTime(String strStart, String strEnd) {
@@ -186,6 +128,10 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    private boolean notExist(String a, String b) {
+        return (a == null) || (b == null) || a.equals("") || b.equals("");
+    }
+
     private Date mouldTime(Date date) {
         Date newDate = new Date();
         newDate.setHours(date.getHours());
@@ -193,12 +139,8 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
         return newDate;
     }
 
-    private void xorFavourites() {
-        favouriteSet = favouriteSet ^ (0x01 << tag - 1);
-    }
-
     private void setFavourites() {
-        if ((favouriteSet & (0x01 << tag - 1)) != 0) {
+        if (FavouritesUtils.selected(tag)) {
             favourites.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_favorites_added, 0, 0, 0);
             favourites.setText("Удалить из избранного");
         } else {

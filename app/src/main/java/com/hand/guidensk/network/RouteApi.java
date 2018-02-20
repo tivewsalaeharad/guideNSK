@@ -1,6 +1,6 @@
 package com.hand.guidensk.network;
 
-import com.hand.guidensk.models.RouteResponse;
+import com.hand.guidensk.model.RouteResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

@@ -25,7 +25,10 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.hand.guidensk.R;
+import com.hand.guidensk.constant.Code;
+import com.hand.guidensk.constant.Key;
 import com.hand.guidensk.db.DB;
+import com.hand.guidensk.utils.FavouritesUtils;
 import com.hand.guidensk.utils.PermissionUtils;
 import com.hand.guidensk.dialog.PermissionDialog;
 
@@ -37,19 +40,8 @@ public class MainActivity extends AppCompatActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback,
         PermissionDialog.GetPermissionListener{
 
-    //Поля, связанные с определением коорднат
     private static final String TAG_PERMISSION_DIALOG = "PermissionDialog";
-    private static final String KEY_FILTER = "Filter";
     private static final int LOCATION_UPDATE_FREQUENCY = 5000;
-    private static final int CODE_FILTER_DINNER = 0;
-    private static final int CODE_FILTER_HOTEL = 1;
-    private static final int CODE_FILTER_CINEMA = 2;
-    private static final int CODE_FILTER_SHOPPING = 3;
-    private static final int CODE_FILTER_THEATRE = 4;
-    private static final int CODE_FILTER_MUSEUM = 5;
-    private static final int CODE_FILTER_INTEREST = 6;
-    private static final int CODE_FILTER_ENTERTAINMENT = 7;
-    private static final int CODE_FILTER_ALL = -1;
     private static Boolean gpsEnabled;
     public static double latitude;
     public static double longitude;
@@ -98,6 +90,15 @@ public class MainActivity extends AppCompatActivity implements
 
         //Настройка баз данных
         DB.init(this);
+
+        //Загрузка избранного
+        FavouritesUtils.get(this);
+    }
+
+    @Override
+    protected void onStop() {
+        FavouritesUtils.put(this);
+        super.onStop();
     }
 
     @Override
@@ -135,51 +136,52 @@ public class MainActivity extends AppCompatActivity implements
                 break;
             case R.id.nav_map:
                 intent = new Intent(this, MapsActivity.class);
-                intent.putExtra(KEY_FILTER, CODE_FILTER_ALL);
+                intent.putExtra(Key.FILTER, Code.FILTER_ALL);
                 startActivity(intent);
                 break;
             case R.id.nav_dinner:
                 intent = new Intent(this, MapsActivity.class);
-                intent.putExtra(KEY_FILTER, CODE_FILTER_DINNER);
+                intent.putExtra(Key.FILTER, Code.FILTER_DINNER);
                 startActivity(intent);
                 break;
             case R.id.nav_hotel:
                 intent = new Intent(this, MapsActivity.class);
-                intent.putExtra(KEY_FILTER, CODE_FILTER_HOTEL);
+                intent.putExtra(Key.FILTER, Code.FILTER_HOTEL);
                 startActivity(intent);
                 break;
             case R.id.nav_cinema:
                 intent = new Intent(this, MapsActivity.class);
-                intent.putExtra(KEY_FILTER, CODE_FILTER_CINEMA);
+                intent.putExtra(Key.FILTER, Code.FILTER_CINEMA);
                 startActivity(intent);
                 break;
             case R.id.nav_shopping:
                 intent = new Intent(this, MapsActivity.class);
-                intent.putExtra(KEY_FILTER, CODE_FILTER_SHOPPING);
+                intent.putExtra(Key.FILTER, Code.FILTER_SHOPPING);
                 startActivity(intent);
                 break;
             case R.id.nav_theatre:
                 intent = new Intent(this, MapsActivity.class);
-                intent.putExtra(KEY_FILTER, CODE_FILTER_THEATRE);
+                intent.putExtra(Key.FILTER, Code.FILTER_THEATRE);
                 startActivity(intent);
                 break;
             case R.id.nav_museum:
                 intent = new Intent(this, MapsActivity.class);
-                intent.putExtra(KEY_FILTER, CODE_FILTER_MUSEUM);
+                intent.putExtra(Key.FILTER, Code.FILTER_MUSEUM);
                 startActivity(intent);
                 break;
             case R.id.nav_interest:
                 intent = new Intent(this, MapsActivity.class);
-                intent.putExtra(KEY_FILTER, CODE_FILTER_INTEREST);
+                intent.putExtra(Key.FILTER, Code.FILTER_INTEREST);
                 startActivity(intent);
                 break;
             case R.id.nav_entertainment:
                 intent = new Intent(this, MapsActivity.class);
-                intent.putExtra(KEY_FILTER, CODE_FILTER_ENTERTAINMENT);
+                intent.putExtra(Key.FILTER, Code.FILTER_ENTERTAINMENT);
                 startActivity(intent);
                 break;
             case R.id.nav_favourites:
-                //
+                intent = new Intent(this, FavouritesActivity.class);
+                startActivity(intent);
                 break;
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
