@@ -10,23 +10,23 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
+import com.google.maps.android.clustering.ClusterManager;
 import com.hand.guidensk.R;
+import com.hand.guidensk.cluster.PlaceItem;
+import com.hand.guidensk.cluster.PlaceRenderer;
 import com.hand.guidensk.constant.Key;
-import com.hand.guidensk.constant.Markers;
 import com.hand.guidensk.constant.S;
 import com.hand.guidensk.db.DB;
 import com.hand.guidensk.utils.ShowPlaceUtils;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private int filter;
     private GoogleMap mMap;
+    private ClusterManager<PlaceItem> manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +41,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        manager = new ClusterManager<>(this, mMap);
+        manager.setRenderer(new PlaceRenderer(this, mMap, manager));
+        manager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<PlaceItem>() {
+            @Override
+            public boolean onClusterItemClick(PlaceItem placeItem) {
+                ShowPlaceUtils.showPlace(MapsActivity.this, placeItem.getIndex());
+                return true;
+            }
+        });
+        mMap.setOnCameraChangeListener(manager);
+        mMap.setOnMarkerClickListener(manager);
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         Cursor cursor;
         if (filter == -1) cursor = DB.db.rawQuery(S.SQL_ALL, null);
@@ -52,27 +63,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         cursor.close();
         setCameraAndZoomToBuilder(builder);
-        mMap.setOnMarkerClickListener(this);
-    }
-
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        ShowPlaceUtils.showPlace(this, (int) marker.getTag());
-        return true;
     }
 
     private LatLng putMarkerFromCursor(Cursor cursor) {
        try {
-            LatLng point = new LatLng(cursor.getFloat(11), cursor.getFloat(12));
-            Marker marker = mMap.addMarker(new MarkerOptions()
-                    .position(point)
-                    .icon(BitmapDescriptorFactory.fromResource(Markers.ARRAY[cursor.getInt(13)])));
-            marker.setTag(cursor.getInt(0));
-            cursor.moveToNext();
-            return point;
+           LatLng point = new LatLng(cursor.getFloat(11), cursor.getFloat(12));
+
+           PlaceItem item = new PlaceItem(point.latitude, point.longitude, cursor.getInt(13), cursor.getInt(0));
+           manager.addItem(item);
+           cursor.moveToNext();
+           return point;
        } catch (Exception ignore) {
-            cursor.moveToNext();
-            return null;
+           cursor.moveToNext();
+           return null;
         }
     }
 

@@ -19,6 +19,16 @@ public class FavouritesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favourites);
         listView = findViewById(R.id.list_view);
+        drawFavourites();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        drawFavourites();
+    }
+
+    private void drawFavourites() {
         ArrayList<Integer> items = new ArrayList<>();
         for (int i = 1; i <= 40; i++) if (FavouritesUtils.selected(i)) items.add(i);
         adapter = new FavouritesAdapter(this, items);

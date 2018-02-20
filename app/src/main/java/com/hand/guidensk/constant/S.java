@@ -10,4 +10,6 @@ public class S {
     public static final String BREAK_HOURS_TEMPLATE = "Перерыв с %s по %s\n";
     public static final String NOW_OPENED = "Сейчас открыто";
     public static final String NOW_CLOSED = "Сейчас закрыто";
+    public static final String IN_FAVOURITES = "В избранном";
+    public static final String ADD_TO_FAVOURITES = "Добавить в избранное";
 }

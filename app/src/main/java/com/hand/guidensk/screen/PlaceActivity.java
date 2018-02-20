@@ -142,10 +142,10 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
     private void setFavourites() {
         if (FavouritesUtils.selected(tag)) {
             favourites.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_favorites_added, 0, 0, 0);
-            favourites.setText("Удалить из избранного");
+            favourites.setText(S.IN_FAVOURITES);
         } else {
             favourites.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_favorites_toadd, 0, 0, 0);
-            favourites.setText("Добавить в избранное");
+            favourites.setText(S.ADD_TO_FAVOURITES);
         }
     }
 
