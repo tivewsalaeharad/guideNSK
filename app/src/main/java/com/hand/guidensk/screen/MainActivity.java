@@ -1,6 +1,7 @@
 package com.hand.guidensk.screen;
 
 import android.Manifest;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -28,6 +29,9 @@ import com.hand.guidensk.R;
 import com.hand.guidensk.constant.Code;
 import com.hand.guidensk.constant.Key;
 import com.hand.guidensk.db.DB;
+import com.hand.guidensk.fragment.CategoryFragment;
+import com.hand.guidensk.fragment.RootFragment;
+import com.hand.guidensk.fragment.ToSeeFragment;
 import com.hand.guidensk.utils.FavouritesUtils;
 import com.hand.guidensk.utils.PermissionUtils;
 import com.hand.guidensk.dialog.PermissionDialog;
@@ -38,7 +42,8 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
         ActivityCompat.OnRequestPermissionsResultCallback,
-        PermissionDialog.GetPermissionListener{
+        PermissionDialog.GetPermissionListener,
+        View.OnClickListener{
 
     private static final String TAG_PERMISSION_DIALOG = "PermissionDialog";
     private static final int LOCATION_UPDATE_FREQUENCY = 5000;
@@ -50,6 +55,17 @@ public class MainActivity extends AppCompatActivity implements
     private DrawerLayout mainLayout;
     private ProgressBar progressBar;
     private Menu navigationMenu;
+    private RootFragment rootFragment;
+    private CategoryFragment dinnerFragment;
+    private CategoryFragment hotelFragment;
+    private ToSeeFragment toSeeFragment;
+    private CategoryFragment cinemaFragment;
+    private CategoryFragment shoppingFragment;
+    private CategoryFragment theatreFragment;
+    private CategoryFragment museumFragment;
+    private CategoryFragment interestFrafment;
+    private CategoryFragment entertainmentFragment;
+    private FragmentTransaction transaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,19 +75,35 @@ public class MainActivity extends AppCompatActivity implements
         }
         setContentView(R.layout.activity_main);
 
+        //Настройка панелей
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Выбор редакции");
-
+        getSupportActionBar().setTitle("Выбор");
         mainLayout = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mainLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mainLayout.addDrawerListener(toggle);
         toggle.syncState();
 
+        //Настройка навигационного меню
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this);
         navigationMenu = navigationView.getMenu();
+
+        //Установка содержания экрана
+        rootFragment = new RootFragment();
+        dinnerFragment = new CategoryFragment(); dinnerFragment.category = 0;
+        hotelFragment = new CategoryFragment(); hotelFragment.category = 1;
+        toSeeFragment = new ToSeeFragment();
+        cinemaFragment = new CategoryFragment(); cinemaFragment.category = 2;
+        shoppingFragment = new CategoryFragment(); shoppingFragment.category = 3;
+        theatreFragment = new CategoryFragment(); theatreFragment.category = 4;
+        museumFragment = new CategoryFragment(); museumFragment.category = 5;
+        interestFrafment = new CategoryFragment(); interestFrafment.category = 6;
+        entertainmentFragment = new CategoryFragment(); entertainmentFragment.category = 7;
+        transaction = getFragmentManager().beginTransaction();
+        transaction.add(R.id.container_fragments, rootFragment);
+        transaction.commit();
 
         //Настройка геолокации
         progressBar = findViewById(R.id.progress_bar);
@@ -102,6 +134,42 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onClick(View v) {
+        transaction = getFragmentManager().beginTransaction();
+        switch (v.getId()) {
+            case R.id.dinner:
+                transaction.replace(R.id.container_fragments, dinnerFragment);
+                break;
+            case R.id.hotel:
+                transaction.replace(R.id.container_fragments, hotelFragment);
+                break;
+            case R.id.to_see:
+                transaction.replace(R.id.container_fragments, toSeeFragment);
+                break;
+            case R.id.cinema:
+                transaction.replace(R.id.container_fragments, cinemaFragment);
+                break;
+            case R.id.shopping:
+                transaction.replace(R.id.container_fragments, shoppingFragment);
+                break;
+            case R.id.theatre:
+                transaction.replace(R.id.container_fragments, theatreFragment);
+                break;
+            case R.id.museum:
+                transaction.replace(R.id.container_fragments, museumFragment);
+                break;
+            case R.id.interest:
+                transaction.replace(R.id.container_fragments, interestFrafment);
+                break;
+            case R.id.entertainment:
+                transaction.replace(R.id.container_fragments, entertainmentFragment);
+                break;
+        }
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -109,21 +177,6 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

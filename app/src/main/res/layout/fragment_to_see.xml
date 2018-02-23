@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:baselineAligned="false">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+    <RelativeLayout
+        android:id="@+id/cinema"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="@dimen/base_padding"
+        android:background="@color/charcoal"
+        android:onClick="onClick">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/image_cinema_luxor"
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/dark_gray" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal"
+            android:text="@string/cinema"
+            android:textSize="24sp"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="bold"
+            android:shadowColor="@color/colorPrimaryDark"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="20"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/shopping"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="@dimen/base_padding"
+        android:background="@color/dark_gray"
+        android:onClick="onClick">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/image_shop_aura"
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/charcoal" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal"
+            android:text="@string/shopping"
+            android:textSize="24sp"
+            android:textColor="@color/free_speech_red"
+            android:textStyle="bold"
+            android:shadowColor="@color/maroon"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="20"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/theatre"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="@dimen/base_padding"
+        android:background="@color/charcoal"
+        android:onClick="onClick">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/image_theatre_globus"
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/dark_gray" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal"
+            android:text="@string/theatre"
+            android:textSize="24sp"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="bold"
+            android:shadowColor="@color/colorPrimaryDark"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="20"/>
+
+    </RelativeLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/museum"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="@dimen/base_padding"
+        android:background="@color/dark_gray"
+        android:onClick="onClick">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/image_museum_region"
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/charcoal" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal"
+            android:text="@string/museum"
+            android:textSize="24sp"
+            android:textColor="@color/free_speech_red"
+            android:textStyle="bold"
+            android:shadowColor="@color/maroon"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="20"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/interest"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="@dimen/base_padding"
+        android:background="@color/charcoal"
+        android:onClick="onClick">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/image_interest_alexandrnevskiy"
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/dark_gray" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal"
+            android:text="@string/interest"
+            android:textSize="24sp"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="bold"
+            android:shadowColor="@color/colorPrimaryDark"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="20"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/entertainment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="@dimen/base_padding"
+        android:background="@color/dark_gray"
+        android:onClick="onClick">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/image_entertainment_circus"
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/charcoal" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal"
+            android:text="@string/entertainment"
+            android:textSize="24sp"
+            android:textColor="@color/free_speech_red"
+            android:textStyle="bold"
+            android:shadowColor="@color/maroon"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="20"/>
+
+    </RelativeLayout>
+    </LinearLayout>
+
+</LinearLayout>

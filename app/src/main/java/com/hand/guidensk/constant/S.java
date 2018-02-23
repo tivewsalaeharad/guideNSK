@@ -12,4 +12,6 @@ public class S {
     public static final String NOW_CLOSED = "Сейчас закрыто";
     public static final String IN_FAVOURITES = "В избранном";
     public static final String ADD_TO_FAVOURITES = "Добавить в избранное";
+    public static final String DISTANCE = "Расстояние: ";
+    public static final String DURATION = "Время в пути: ";
 }

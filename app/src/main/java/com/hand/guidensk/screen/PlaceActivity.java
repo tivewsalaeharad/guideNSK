@@ -8,10 +8,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.hand.guidensk.R;
 import com.hand.guidensk.constant.Images;
 import com.hand.guidensk.constant.Key;
 import com.hand.guidensk.constant.S;
+import com.hand.guidensk.network.RouteManager;
 import com.hand.guidensk.utils.FavouritesUtils;
 
 import java.text.SimpleDateFormat;
@@ -19,7 +21,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class PlaceActivity extends AppCompatActivity implements View.OnClickListener {
+public class PlaceActivity extends AppCompatActivity implements View.OnClickListener, RouteManager.OnGetDistanceAndTimeCallback {
 
     TextView title;
     TextView preDescription;
@@ -29,6 +31,8 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
     TextView address;
     TextView hours;
     TextView description;
+    TextView distance;
+    TextView duration;
     TextView favourites;
     double latitude;
     double longitude;
@@ -52,14 +56,20 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.route:
                 Intent intent = new Intent(this, RouteActivity.class);
-                //Освободить после отладки
-                //intent.putExtra(Key.USER_LATITUDE, MainActivity.latitude);
-                //intent.putExtra(Key.USER_LONGITUDE, MainActivity.longitude);
+                //Удалить добавки после отладки
+                intent.putExtra(Key.USER_LATITUDE, MainActivity.latitude     -0.5796789  );
+                intent.putExtra(Key.USER_LONGITUDE, MainActivity.longitude  +44.8150111  );
                 intent.putExtra(Key.PLACE_LATITUDE, latitude);
                 intent.putExtra(Key.PLACE_LONGITUDE, longitude);
                 startActivity(intent);
                 break;
         }
+    }
+
+    @Override
+    public void onGetDistanceAndTime(String distance, String duration) {
+        this.distance.setText(S.DISTANCE.concat(distance));
+        this.duration.setText(S.DURATION.concat(duration));
     }
 
     @Override
@@ -77,6 +87,8 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
         address = findViewById(R.id.address);
         hours = findViewById(R.id.hours);
         description = findViewById(R.id.description);
+        distance = findViewById(R.id.distance);
+        duration = findViewById(R.id.duration);
         favourites = findViewById(R.id.favourites);
         Intent intent = getIntent();
         tag = intent.getIntExtra(Key.TAG, -1);
@@ -91,7 +103,11 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
         setFavourites();
         latitude = intent.getDoubleExtra(Key.LATITUDE, 55.0302577);
         longitude = intent.getDoubleExtra(Key.LONGITUDE, 82.9233965);
-
+        //Освободить после отладки
+        RouteManager.getDistanceAndTime(this,
+                new LatLng(MainActivity.latitude     -0.5796789,
+                          MainActivity.longitude    +44.8150111      ),
+                new LatLng(latitude, longitude));
     }
 
     private void putText(TextView textView, Intent intent, String key) {
@@ -148,5 +164,4 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
             favourites.setText(S.ADD_TO_FAVOURITES);
         }
     }
-
 }

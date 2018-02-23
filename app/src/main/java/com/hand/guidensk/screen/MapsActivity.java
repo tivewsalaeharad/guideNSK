@@ -10,9 +10,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 import com.hand.guidensk.R;
 import com.hand.guidensk.cluster.PlaceItem;
@@ -50,9 +53,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return true;
             }
         });
+        manager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<PlaceItem>() {
+            @Override
+            public boolean onClusterClick(Cluster<PlaceItem> cluster) {
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                for (PlaceItem item : cluster.getItems()) builder.include(item.getPosition());
+                setCameraAndZoomToBuilder(builder, false);
+                return true;
+            }
+        });
         mMap.setOnCameraChangeListener(manager);
         mMap.setOnMarkerClickListener(manager);
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        //Добавляем метки всех достопримечательностей
         Cursor cursor;
         if (filter == -1) cursor = DB.db.rawQuery(S.SQL_ALL, null);
         else cursor = DB.db.rawQuery(S.SQL_CATEGORY, new String[] {filter + ""});
@@ -62,14 +76,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (point != null) builder.include(point);
         }
         cursor.close();
-        setCameraAndZoomToBuilder(builder);
+
+        //Добавляем местоположение пользователя
+        LatLng user = new LatLng(
+                //Удалить добавки после отладки
+                MainActivity.latitude     -0.5796789   ,
+                MainActivity.longitude  +44.8150111   );
+        mMap.addMarker(new MarkerOptions()
+                .position(user)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_user)));
+        builder.include(user);
+        setCameraAndZoomToBuilder(builder, true);
     }
 
     private LatLng putMarkerFromCursor(Cursor cursor) {
        try {
            LatLng point = new LatLng(cursor.getFloat(11), cursor.getFloat(12));
-
-           PlaceItem item = new PlaceItem(point.latitude, point.longitude, cursor.getInt(13), cursor.getInt(0));
+           PlaceItem item = new PlaceItem(point, cursor.getInt(13), cursor.getInt(0));
            manager.addItem(item);
            cursor.moveToNext();
            return point;
@@ -79,10 +102,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void setCameraAndZoomToBuilder(LatLngBounds.Builder builder) {
+    private void setCameraAndZoomToBuilder(LatLngBounds.Builder builder, boolean fast) {
         int size = getResources().getDisplayMetrics().widthPixels;
         LatLngBounds latLngBounds = builder.build();
         CameraUpdate track = CameraUpdateFactory.newLatLngBounds(latLngBounds, size, size, 25);
-        mMap.moveCamera(track);
+        if (fast) mMap.moveCamera(track);
+        else mMap.animateCamera(track, 2000, null);
     }
 }
