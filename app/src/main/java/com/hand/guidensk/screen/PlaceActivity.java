@@ -34,8 +34,9 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
     TextView distance;
     TextView duration;
     TextView favourites;
-    double latitude;
-    double longitude;
+    public double latitude;
+    public double longitude;
+    int category;
 
     private static SimpleDateFormat hhmm;
     private Date today;
@@ -56,11 +57,11 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.route:
                 Intent intent = new Intent(this, RouteActivity.class);
-                //Удалить добавки после отладки
-                intent.putExtra(Key.USER_LATITUDE, MainActivity.latitude     -0.5796789  );
-                intent.putExtra(Key.USER_LONGITUDE, MainActivity.longitude  +44.8150111  );
+                intent.putExtra(Key.USER_LATITUDE, MainActivity.latitude   /*  -0.5796789 */ );
+                intent.putExtra(Key.USER_LONGITUDE, MainActivity.longitude /* +44.8150111 */ ); //Отладочный довесок
                 intent.putExtra(Key.PLACE_LATITUDE, latitude);
                 intent.putExtra(Key.PLACE_LONGITUDE, longitude);
+                intent.putExtra(Key.FILTER, category);
                 startActivity(intent);
                 break;
         }
@@ -76,6 +77,7 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place);
+        MainActivity.placeActivity = this;
         hhmm = new SimpleDateFormat("HH:mm", Locale.getDefault());
         hhmm.setTimeZone(TimeZone.getTimeZone("GMT+07"));
         today = new Date();
@@ -103,11 +105,17 @@ public class PlaceActivity extends AppCompatActivity implements View.OnClickList
         setFavourites();
         latitude = intent.getDoubleExtra(Key.LATITUDE, 55.0302577);
         longitude = intent.getDoubleExtra(Key.LONGITUDE, 82.9233965);
-        //Освободить после отладки
+        category = intent.getIntExtra(Key.FILTER, 0);
         RouteManager.getDistanceAndTime(this,
-                new LatLng(MainActivity.latitude     -0.5796789,
-                          MainActivity.longitude    +44.8150111      ),
+                new LatLng(MainActivity.latitude   /*  -0.5796789 */,
+                          MainActivity.longitude   /* +44.8150111  */    ), //Отладочный довесок
                 new LatLng(latitude, longitude));
+    }
+
+    @Override
+    protected void onDestroy() {
+        MainActivity.placeActivity = null;
+        super.onDestroy();
     }
 
     private void putText(TextView textView, Intent intent, String key) {

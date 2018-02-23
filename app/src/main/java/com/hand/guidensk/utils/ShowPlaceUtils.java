@@ -29,6 +29,7 @@ public class ShowPlaceUtils {
             intent.putExtra(Key.BREAK_END, cursor.getString(10));
             intent.putExtra(Key.LATITUDE, cursor.getDouble(11));
             intent.putExtra(Key.LONGITUDE, cursor.getDouble(12));
+            intent.putExtra(Key.FILTER, cursor.getInt(13));
             activity.startActivity(intent);
         }
         cursor.close();

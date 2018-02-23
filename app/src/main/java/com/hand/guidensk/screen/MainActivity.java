@@ -5,12 +5,13 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -24,6 +25,8 @@ import android.widget.ProgressBar;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.hand.guidensk.R;
 import com.hand.guidensk.constant.Code;
@@ -32,9 +35,11 @@ import com.hand.guidensk.db.DB;
 import com.hand.guidensk.fragment.CategoryFragment;
 import com.hand.guidensk.fragment.RootFragment;
 import com.hand.guidensk.fragment.ToSeeFragment;
+import com.hand.guidensk.network.RouteManager;
 import com.hand.guidensk.utils.FavouritesUtils;
 import com.hand.guidensk.utils.PermissionUtils;
 import com.hand.guidensk.dialog.PermissionDialog;
+import com.stephentuso.welcome.WelcomeHelper;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -50,12 +55,15 @@ public class MainActivity extends AppCompatActivity implements
     private static Boolean gpsEnabled;
     public static double latitude;
     public static double longitude;
+    public static Marker mapsMarker;
+    public static Marker routeMarker;
+    public static RouteActivity routeActivity;
+    public static PlaceActivity placeActivity;
     private FusedLocationProviderClient mFusedLocationClient;
     private Timer timer;
     private DrawerLayout mainLayout;
     private ProgressBar progressBar;
     private Menu navigationMenu;
-    private RootFragment rootFragment;
     private CategoryFragment dinnerFragment;
     private CategoryFragment hotelFragment;
     private ToSeeFragment toSeeFragment;
@@ -63,22 +71,25 @@ public class MainActivity extends AppCompatActivity implements
     private CategoryFragment shoppingFragment;
     private CategoryFragment theatreFragment;
     private CategoryFragment museumFragment;
-    private CategoryFragment interestFrafment;
+    private CategoryFragment interestFragment;
     private CategoryFragment entertainmentFragment;
     private FragmentTransaction transaction;
+    WelcomeHelper welcomeScreen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-        }
         setContentView(R.layout.activity_main);
+
+        //Демонстрация вводного экрана
+        welcomeScreen = new WelcomeHelper(this, GuideWelcomeActivity.class);
+        welcomeScreen.show(savedInstanceState);
 
         //Настройка панелей
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Выбор");
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) actionBar.setTitle("Выбор категории");
         mainLayout = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mainLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mainLayout.addDrawerListener(toggle);
@@ -91,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements
         navigationMenu = navigationView.getMenu();
 
         //Установка содержания экрана
-        rootFragment = new RootFragment();
+        RootFragment rootFragment = new RootFragment();
         dinnerFragment = new CategoryFragment(); dinnerFragment.category = 0;
         hotelFragment = new CategoryFragment(); hotelFragment.category = 1;
         toSeeFragment = new ToSeeFragment();
@@ -99,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements
         shoppingFragment = new CategoryFragment(); shoppingFragment.category = 3;
         theatreFragment = new CategoryFragment(); theatreFragment.category = 4;
         museumFragment = new CategoryFragment(); museumFragment.category = 5;
-        interestFrafment = new CategoryFragment(); interestFrafment.category = 6;
+        interestFragment = new CategoryFragment(); interestFragment.category = 6;
         entertainmentFragment = new CategoryFragment(); entertainmentFragment.category = 7;
         transaction = getFragmentManager().beginTransaction();
         transaction.add(R.id.container_fragments, rootFragment);
@@ -134,6 +145,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState);
+        welcomeScreen.onSaveInstanceState(outState);
+    }
+
+    @Override
     public void onClick(View v) {
         transaction = getFragmentManager().beginTransaction();
         switch (v.getId()) {
@@ -159,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements
                 transaction.replace(R.id.container_fragments, museumFragment);
                 break;
             case R.id.interest:
-                transaction.replace(R.id.container_fragments, interestFrafment);
+                transaction.replace(R.id.container_fragments, interestFragment);
                 break;
             case R.id.entertainment:
                 transaction.replace(R.id.container_fragments, entertainmentFragment);
@@ -179,14 +196,10 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Intent intent;
         switch (item.getItemId()) {
-            case R.id.nav_select:
-                //
-                break;
             case R.id.nav_map:
                 intent = new Intent(this, MapsActivity.class);
                 intent.putExtra(Key.FILTER, Code.FILTER_ALL);
@@ -286,11 +299,15 @@ public class MainActivity extends AppCompatActivity implements
                     latitude = location.getLatitude();
                     longitude = location.getLongitude();
                     progressBar.setVisibility(View.GONE);
-                    //navigationMenu.getItem(1).setEnabled(true);
                     navigationMenu.setGroupEnabled(R.id.group_map, true);
+                    LatLng point = new LatLng(latitude, longitude);
+                    if (mapsMarker != null) mapsMarker.setPosition(point);
+                    if (routeMarker != null) routeMarker.setPosition(point);
+                    if (routeActivity != null) RouteManager.getRoute(routeActivity, point, routeActivity.place);
+                    if (placeActivity != null) RouteManager.getDistanceAndTime(placeActivity, point,
+                            new LatLng(placeActivity.latitude, placeActivity.longitude));
                 } else {
                     progressBar.setVisibility(View.VISIBLE);
-                    //navigationMenu.getItem(1).setEnabled(false);
                     navigationMenu.setGroupEnabled(R.id.group_map, false);
                 }
             }
@@ -327,7 +344,6 @@ public class MainActivity extends AppCompatActivity implements
 
     private void gpsTurnedOffMessage() {
         Snackbar.make(mainLayout, R.string.gps_turned_off, Snackbar.LENGTH_SHORT).setAction(R.string.ok, null).show();
-        //navigationMenu.getItem(1).setEnabled(false);
         navigationMenu.setGroupEnabled(R.id.group_map, false);
         progressBar.setVisibility(View.GONE);
     }

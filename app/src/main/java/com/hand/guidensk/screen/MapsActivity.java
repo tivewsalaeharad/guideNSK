@@ -42,6 +42,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
+    protected void onDestroy() {
+        MainActivity.mapsMarker = null;
+        super.onDestroy();
+    }
+
+    @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         manager = new ClusterManager<>(this, mMap);
@@ -79,10 +85,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //Добавляем местоположение пользователя
         LatLng user = new LatLng(
-                //Удалить добавки после отладки
-                MainActivity.latitude     -0.5796789   ,
-                MainActivity.longitude  +44.8150111   );
-        mMap.addMarker(new MarkerOptions()
+                MainActivity.latitude   /*  -0.5796789 */  ,
+                MainActivity.longitude  /* +44.8150111 */  ); //Отладочный довесок
+        MainActivity.mapsMarker = mMap.addMarker(new MarkerOptions()
                 .position(user)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_user)));
         builder.include(user);

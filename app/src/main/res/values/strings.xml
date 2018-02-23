@@ -33,4 +33,7 @@
     <string name="title_activity_route">Проложить маршрут</string>
     <string name="route">Проложить маршрут</string>
 
+    <string name="done">Готово</string>
+    <string name="skip">Пропустить</string>
+
 </resources>
